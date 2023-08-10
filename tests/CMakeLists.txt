@@ -1,4 +1,3 @@
-include(FetchContent)
 FetchContent_Declare (
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
@@ -17,10 +16,10 @@ function(GenerateTests TARGET_FOR_TEST TESTS_PATH)
 
     foreach(TEST ${TESTS})
         cmake_path(GET TEST STEM TESTNAME)
-        add_executable(${TESTNAME} ${TEST})
+        add_executable(test${TESTNAME} ${TEST})
 
         target_link_libraries (
-            ${TESTNAME}
+            test${TESTNAME}
             PRIVATE
                 GTest::gtest
                 ${TARGET_FOR_TEST}

@@ -9,17 +9,36 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     )
 endif()
 
-option(CRP_HASHES  "Enable hash functions on" ON)
-option(CRP_RANDOM  "Enable random functions on" ON)
-option(CRP_TESTS   "Enable tests on" OFF)
-option(CRP_DEBUG   "Enable debug options" ON)
-option(CRP_RELEASE "Enable max optimizations on" ON)
-option(CRP_WERROR  "Enable warning messages on" ON)
+option(CRP_HASHES       "Enable hash functions on" ON)
+option(CRP_RANDOM       "Enable random functions on" ON)
+option(CRP_TESTS        "Enable tests on" ON)
+option(CRP_DEBUG        "Enable debug options" ON)
+option(CRP_RELEASE      "Enable max optimizations on" ON)
+option(CRP_WERROR       "Enable warning messages on" ON)
+option(CRP_BENCHMARKS   "Enable benchmarks on" ON)
+option(CRP_USE_MIMALLOC "Use mimalloc on" ON)
+
+include(FetchContent)
+if(CRP_USE_MIMALLOC)
+    FetchContent_Declare (
+        mimalloc
+        GIT_REPOSITORY https://github.com/microsoft/mimalloc.git
+        GIT_TAG master
+        FIND_PACKAGE_ARGS NAMES mimalloc
+    )
+    FetchContent_GetProperties(mimalloc)
+    FetchContent_MakeAvailable(mimalloc)
+endif()
 
 if(CRP_TESTS)
     message(STATUS "Tests enabled")
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(CRP_BENCHMARKS)
+    message(STATUS "Benchmarks enabled")
+    add_subdirectory(benchmarks)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -38,7 +57,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
         set(PEDANTIC_COMPILE_FLAGS ${PEDANTIC_COMPILE_FLAGS} -Wdouble-promotion
-            -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast
+            -Wtrampolines -Wuseless-cast
             -Wvector-operation-performance -Wsized-deallocation -Wshadow)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
@@ -53,11 +72,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(PEDANTIC_COMPILE_FLAGS -Wall -Wextra -pedantic -Wconversion -Wundef
         -Wdeprecated -Wweak-vtables -Wshadow
         -Wno-gnu-zero-variadic-macro-arguments)
-    check_cxx_compiler_flag(-Wzero-as-null-pointer-constant HAS_NULLPTR_WARNING)
-    if (HAS_NULLPTR_WARNING)
-        set(PEDANTIC_COMPILE_FLAGS ${PEDANTIC_COMPILE_FLAGS}
-            -Wzero-as-null-pointer-constant)
-    endif ()
     set(WERROR_FLAG -Werror)
 endif ()
 
@@ -90,6 +104,19 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
         PRIVATE
             ${PEDANTIC_COMPILE_FLAGS}
     )
+
+    if(CRP_USE_MIMALLOC)
+        target_link_libraries (
+            ${LIBRARY_NAME}
+            PUBLIC
+                mimalloc
+        )
+        target_compile_definitions (
+            ${LIBRARY_NAME}
+            PUBLIC
+                CRP_USE_MIMALLOC
+        )
+    endif()
 
     if(CRP_DEBUG)
         target_compile_options (
