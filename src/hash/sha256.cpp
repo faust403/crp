@@ -37,7 +37,26 @@
     return ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10);
 }
 
-static void update(std::uint32_t* Result, const std::uint8_t* From) noexcept
+template<typename Type>
+[[ nodiscard ]] std::string to_binary(Type Data) noexcept
+{
+    std::string Result = "";
+
+    std::uint64_t CurrentBit = 8 * sizeof Data;
+    while(CurrentBit--)
+        Result += ((Data >> CurrentBit) & 1) == 0 ? "0" : "1";
+
+    return Result;
+}
+
+static void update (
+    # ifndef CRP_USE_SIMD
+        std::uint32_t* Result,
+    # else
+        crp_128i* Result,
+    # endif
+    const std::uint8_t* From
+) noexcept
 {
     constexpr static std::uint32_t Constants[] = {
         0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -50,51 +69,126 @@ static void update(std::uint32_t* Result, const std::uint8_t* From) noexcept
         0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
     };
 
-    std::uint32_t Schedule[256];
-    std::memset(Schedule, 0x0, 256);   
+    # ifndef CRP_USE_SIMD
+        static std::uint32_t Schedule[64];
+        std::memset(Schedule, 0x0, 64);   
 
-    std::uint8_t Iter = 0;
-    for(std::uint8_t Kter = 0x0; Iter < 64; Iter += 4, Kter += 1)
-        Schedule[Kter] = static_cast<std::uint32_t>(From[Iter]) << 24
-                    |  static_cast<std::uint32_t>(From[Iter + 1]) << 16
-                    |  static_cast<std::uint32_t>(From[Iter + 2]) << 8
-                    |  static_cast<std::uint32_t>(From[Iter + 3]);
+        std::uint8_t Iter = 0;
+        for(std::uint8_t Kter = 0x0; Iter < 64; Iter += 4, Kter += 1)
+            Schedule[Kter] = static_cast<std::uint32_t>(From[Iter]) << 24
+                        |  static_cast<std::uint32_t>(From[Iter + 1]) << 16
+                        |  static_cast<std::uint32_t>(From[Iter + 2]) << 8
+                        |  static_cast<std::uint32_t>(From[Iter + 3]);
 
-    for(Iter = 16; Iter < 64; Iter += 1)
-        Schedule[Iter] = s1(Schedule[Iter - 2]) + Schedule[Iter - 7] + s0(Schedule[Iter - 15]) + Schedule[Iter - 16];
+        for(Iter = 16; Iter < 64; Iter += 1)
+            Schedule[Iter] = s1(Schedule[Iter - 2]) + Schedule[Iter - 7] + s0(Schedule[Iter - 15]) + Schedule[Iter - 16];
 
-    std::uint32_t a = Result[0];
-    std::uint32_t b = Result[1];
-    std::uint32_t c = Result[2];
-    std::uint32_t d = Result[3];
-    std::uint32_t e = Result[4];
-    std::uint32_t f = Result[5];
-    std::uint32_t g = Result[6];
-    std::uint32_t h = Result[7];
+        std::uint32_t a = Result[0];
+        std::uint32_t b = Result[1];
+        std::uint32_t c = Result[2];
+        std::uint32_t d = Result[3];
+        std::uint32_t e = Result[4];
+        std::uint32_t f = Result[5];
+        std::uint32_t g = Result[6];
+        std::uint32_t h = Result[7];
 
-    for(Iter = 0x0; Iter < 64; Iter += 1)
-    {
-        const std::uint32_t tmp1 = h + S1(e) + ch(e, f, g) + Constants[Iter] + Schedule[Iter];
-        const std::uint32_t tmp2 = S0(a) + maj(a, b, c);
+        for(Iter = 0x0; Iter < 64; Iter += 1)
+        {
+            const std::uint32_t tmp1 = h + S1(e) + ch(e, f, g) + Constants[Iter] + Schedule[Iter];
+            const std::uint32_t tmp2 = S0(a) + maj(a, b, c);
+            
+            h = g;
+            g = f;
+            f = e;
+            e = d + tmp1;
+            d = c;
+            c = b;
+            b = a;
+            a = tmp1 + tmp2;
+        }
+
+        Result[0] += a;
+        Result[1] += b;
+        Result[2] += c;
+        Result[3] += d;
+        Result[4] += e;
+        Result[5] += f;
+        Result[6] += g;
+        Result[7] += h;
+    # else
+        std::uint64_t Iter = 0x0;
+        crp_align(crp_wordsize) static std::uint32_t Schedule[64];
+        const static crp_128 ZeroVector = crp_zero_128();
         
-        h = g;
-        g = f;
-        f = e;
-        e = d + tmp1;
-        d = c;
-        c = b;
-        b = a;
-        a = tmp1 + tmp2;
-    }
+        # pragma omp simd safelen(4)
+        for(; Iter < 64; Iter += 4)
+            crp_store_aligned_128((crp_128i*)&Schedule[Iter], ZeroVector);
 
-    Result[0] += a;
-    Result[1] += b;
-    Result[2] += c;
-    Result[3] += d;
-    Result[4] += e;
-    Result[5] += f;
-    Result[6] += g;
-    Result[7] += h;
+        Iter = 0x0;
+        # pragma omp simd safelen(4)
+        for(std::uint8_t Kter = 0x0; Iter < 64; Iter += 16, Kter += 4)
+        {
+            const crp_128i SettedLines4 = crp_set_16_8 (
+                static_cast<char>(From[Iter + 12]),
+                static_cast<char>(From[Iter + 13]),
+                static_cast<char>(From[Iter + 14]),
+                static_cast<char>(From[Iter + 15]),
+
+                static_cast<char>(From[Iter + 8]),
+                static_cast<char>(From[Iter + 9]),
+                static_cast<char>(From[Iter + 10]),
+                static_cast<char>(From[Iter + 11]),
+
+                static_cast<char>(From[Iter + 4]),
+                static_cast<char>(From[Iter + 5]),
+                static_cast<char>(From[Iter + 6]),
+                static_cast<char>(From[Iter + 7]),
+
+                static_cast<char>(From[Iter]),
+                static_cast<char>(From[Iter + 1]),
+                static_cast<char>(From[Iter + 2]),
+                static_cast<char>(From[Iter + 3])
+            );
+            crp_store_aligned_128((crp_128i*)&Schedule[Kter], SettedLines4);
+        }
+
+        # pragma omp simd
+        for(Iter = 16; Iter < 64; Iter += 4)
+        {
+            Schedule[Iter] = s1(Schedule[Iter - 2]) + Schedule[Iter - 7] + s0(Schedule[Iter - 15]) + Schedule[Iter - 16];
+            Schedule[Iter + 1] = s1(Schedule[Iter - 1]) + Schedule[Iter - 6] + s0(Schedule[Iter - 14]) + Schedule[Iter - 15];
+            Schedule[Iter + 2] = s1(Schedule[Iter]) + Schedule[Iter - 5] + s0(Schedule[Iter - 13]) + Schedule[Iter - 14];
+            Schedule[Iter + 3] = s1(Schedule[Iter + 1]) + Schedule[Iter - 4] + s0(Schedule[Iter - 12]) + Schedule[Iter - 13];
+        }
+
+        crp_align(crp_wordsize) std::uint32_t Intermediate[8];
+        crp_store_aligned_128 ((crp_128i*)&Intermediate[0], Result[0]);
+        crp_store_aligned_128 ((crp_128i*)&Intermediate[4], Result[1]);
+        # pragma omp simd
+        for(Iter = 0x0; Iter < 64; Iter += 1)
+        {
+            const std::uint32_t tmp1 = Intermediate[7] + S1(Intermediate[4]) + ch(Intermediate[4], Intermediate[5], Intermediate[6]) + Constants[Iter] + Schedule[Iter];
+            const std::uint32_t tmp2 = S0(Intermediate[0]) + maj(Intermediate[0], Intermediate[1], Intermediate[2]);
+
+            Intermediate[7] = Intermediate[6];
+            Intermediate[6] = Intermediate[5];
+            Intermediate[5] = Intermediate[4];
+            Intermediate[4] = Intermediate[3] + tmp1;
+            Intermediate[3] = Intermediate[2];
+            Intermediate[2] = Intermediate[1];
+            Intermediate[1] = Intermediate[0];
+            Intermediate[0] = tmp1 + tmp2;
+        }
+
+        crp_128i ResultVector0_3 = Result[0];
+        crp_128i ResultVector4_7 = Result[1];
+        crp_128i NumbersVector0_3 = *(crp_128i*)&Intermediate[0];
+        crp_128i NumbersVector4_7 = *(crp_128i*)&Intermediate[4];
+        crp_128i Results0_3 = crp_add_4_32(ResultVector0_3, NumbersVector0_3);
+        crp_128i Results4_7 = crp_add_4_32(ResultVector4_7, NumbersVector4_7);
+        crp_store_unaligned_128(&Result[0], Results0_3);
+        crp_store_unaligned_128(&Result[1], Results4_7);
+    # endif
 }
 
 [[ nodiscard ]]
@@ -106,27 +200,67 @@ std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
         0x510E527F, 0x9B05688C,
         0x1F83D9AB, 0x5BE0CD19
     };
-    std::uint32_t* Result = (std::uint32_t*)crp_allocate(256);
-    std::memcpy(Result, Initial, 32);
-
+    std::uint64_t Iter = 0x0;
     const std::uint64_t ReservedLength = 64 * ((Length + 8) / 64 + 1);
-    std::uint8_t* MessageBlock = (std::uint8_t*)crp_allocate(ReservedLength);
-
-    std::memset(MessageBlock, 0x0, ReservedLength);
-    std::memcpy(MessageBlock, static_cast<const std::uint8_t*>(Data), Length);
-    MessageBlock[Length] = (std::uint8_t)0b10000000;
     
-    Length *= 8;
-    std::uint64_t Iter = sizeof Length;
-    while(Iter--)
-        MessageBlock[ReservedLength - Iter - 1] = (std::uint8_t)(Length >> (8 * Iter));
-    
-    Iter = 0x0;
-    for(; Iter < ReservedLength; Iter += 64)
-        update(Result, MessageBlock + Iter);
+    # ifndef CRP_USE_SIMD
+        std::uint32_t* Result = (std::uint32_t*)crp_allocate(32);
+        std::memcpy(Result, Initial, 32);
 
-    crp_free(MessageBlock);
-    return Result;
+        std::uint8_t* MessageBlock = (std::uint8_t*)crp_allocate(ReservedLength);
+
+        std::memset(MessageBlock, 0x0, ReservedLength);
+        std::memcpy(MessageBlock, static_cast<const std::uint8_t*>(Data), Length);
+        MessageBlock[Length] = (std::uint8_t)0b10000000;
+        
+        Length *= 8;
+        Iter = sizeof Length;
+        while(Iter--)
+            MessageBlock[ReservedLength - Iter - 1] = (std::uint8_t)(Length >> (8 * Iter));
+        
+        for(Iter = 0x0; Iter < ReservedLength; Iter += 64)
+            update(Result, MessageBlock + Iter);
+
+        crp_free(MessageBlock);
+        return Result;
+    # else
+        crp_align(crp_wordsize) static crp_128i Result[2];
+
+        for(; Iter < 2; Iter += 1)
+            Result[Iter] = crp_set_4_32 (
+                static_cast<std::int32_t>(Initial[Iter * 4 + 3]),
+                static_cast<std::int32_t>(Initial[Iter * 4 + 2]),
+                static_cast<std::int32_t>(Initial[Iter * 4 + 1]),
+                static_cast<std::int32_t>(Initial[Iter * 4])
+            );
+
+        std::uint8_t* MessageBlock = (std::uint8_t*)crp_allocate(ReservedLength);
+        const static crp_128i ZeroVector = crp_zero_128();
+        
+        # pragma omp simd safelen(4)
+        for(Iter = 0x0; Iter < ReservedLength; Iter += 16)
+            crp_store_aligned_128((crp_128i*)&MessageBlock[Iter], ZeroVector);
+
+        # pragma omp simd
+        for(Iter = 0x0; Iter < Length; Iter += 1)
+            MessageBlock[Iter] = static_cast<const std::uint8_t*>(Data)[Iter];
+
+        MessageBlock[Length] = (std::uint8_t)0b10000000;
+        
+        Length *= 8;
+        Iter = sizeof Length;
+        while(Iter--)
+            MessageBlock[ReservedLength - Iter - 1] = (std::uint8_t)(Length >> (8 * Iter));
+        
+        for(Iter = 0x0; Iter < ReservedLength; Iter += 64)
+            update(Result, MessageBlock + Iter);
+
+        std::uint32_t* __Result = (std::uint32_t*)crp_allocate(32);
+        crp_store_unaligned_128((crp_128i*)&__Result[0], Result[0]);
+        crp_store_unaligned_128((crp_128i*)&__Result[4], Result[1]);
+        crp_free(MessageBlock);
+        return __Result;
+    # endif
 }
 
 static std::string symbol_to_hex(const std::uint32_t x)

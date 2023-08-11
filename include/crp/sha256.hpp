@@ -6,6 +6,10 @@
 # include <cstring>
 # include <crp/utils.hpp>
 
+# ifdef CRP_USE_SIMD
+    # include <crp/simd.hpp>
+# endif
+
 # include <iostream>
 
 # define CRP_SHA256_LENGTH_BITS 2'048
