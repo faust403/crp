@@ -17,6 +17,7 @@ option(CRP_RELEASE      "Enable max optimizations on" ON)
 option(CRP_WERROR       "Enable warning messages on" ON)
 option(CRP_BENCHMARKS   "Enable benchmarks on" ON)
 option(CRP_USE_MIMALLOC "Use mimalloc on" ON)
+option(CRP_USE_SIMD     "USE SIMD on" OFF)
 
 include(FetchContent)
 if(CRP_USE_MIMALLOC)
@@ -105,6 +106,15 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
             ${PEDANTIC_COMPILE_FLAGS}
     )
 
+    if(CRP_USE_SIMD)
+        message(WARNING "Now SIMD available only for x86 platforms")
+        target_compile_definitions (
+            ${LIBRARY_NAME}
+            PUBLIC
+                CRP_USE_SIMD
+        )
+    endif()
+
     if(CRP_USE_MIMALLOC)
         target_link_libraries (
             ${LIBRARY_NAME}
@@ -147,3 +157,5 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
 endfunction()
 
 GenerateLibrary("hashes" "include/crp" "src/hash")
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE crp::hashes)
