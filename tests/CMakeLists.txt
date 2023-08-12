@@ -3,6 +3,8 @@ FetchContent_Declare (
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG main
     FIND_PACKAGE_ARGS NAMES GTest
+    CONFIGURE_COMMAND "cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release"
+    BUILD_COMMAND "make -j32"
 )
 FetchContent_GetProperties(googletest)
 FetchContent_MakeAvailable(googletest)

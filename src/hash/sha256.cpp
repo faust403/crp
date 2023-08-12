@@ -37,18 +37,6 @@
     return ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10);
 }
 
-template<typename Type>
-[[ nodiscard ]] std::string to_binary(Type Data) noexcept
-{
-    std::string Result = "";
-
-    std::uint64_t CurrentBit = 8 * sizeof Data;
-    while(CurrentBit--)
-        Result += ((Data >> CurrentBit) & 1) == 0 ? "0" : "1";
-
-    return Result;
-}
-
 static void update (
     # ifndef CRP_USE_SIMD
         std::uint32_t* Result,
@@ -263,29 +251,57 @@ std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
     # endif
 }
 
-static std::string symbol_to_hex(const std::uint32_t x)
+static std::string symbol_to_hex(const std::uint8_t x, const CRP_FORMAT Format)
 {
     std::string String;
-    String.resize(9);
+    String.resize(3);
 
-    std::snprintf(String.data(), 9, "%X", x);
+    switch(Format) {
+        case CRP_FORMAT::upper:
+            std::snprintf(String.data(), 3, "%02X", x);
+            break;
+        case CRP_FORMAT::lower:
+            std::snprintf(String.data(), 3, "%02x", x);
+            break;
+    }
     return String;
 }
 
-std::string crp_to_hex(const std::uint32_t* HexData, std::uint64_t HexLength) noexcept
+std::string crp_to_hex(const std::uint32_t* HexData, std::uint64_t HexLength, const std::string& Delimiter, const CRP_FORMAT Format) noexcept
 {
     std::string Result;
-    Result.reserve(256);
+    Result.reserve(288);
 
-    for(std::uint64_t Iter = 0x0; Iter < HexLength; Iter += 1)
-        Result += symbol_to_hex(HexData[Iter]);
+    if(Delimiter.empty())
+        for(std::uint64_t Iter = 0x0; Iter < HexLength; Iter += 1)
+        {
+            Result += symbol_to_hex((HexData[Iter] >> 24) & 255, Format);
+            Result += symbol_to_hex((HexData[Iter] >> 16) & 255, Format);
+            Result += symbol_to_hex((HexData[Iter] >> 8) & 255, Format);
+            Result += symbol_to_hex(HexData[Iter] & 255, Format);
+        }
+    else
+    {
+        for(std::uint64_t Iter = 0x0; Iter < HexLength; Iter += 1)
+        {
+            Result += symbol_to_hex((HexData[Iter] >> 24) & 255, Format);
+            Result += Delimiter;
+            Result += symbol_to_hex((HexData[Iter] >> 16) & 255, Format);
+            Result += Delimiter;
+            Result += symbol_to_hex((HexData[Iter] >> 8) & 255, Format);
+            Result += Delimiter;
+            Result += symbol_to_hex(HexData[Iter] & 255, Format);
+            Result += Delimiter;
+        }
+        Result.pop_back();
+    }
     return Result;
 }
 
-std::string sha256(const void* Data, const std::uint64_t Length) noexcept
+std::string sha256(const void* Data, const std::uint64_t Length, const std::string Delimiter, const CRP_FORMAT Format) noexcept
 {
     std::uint32_t* __Result = raw_sha256(Data, Length);
-    std::string Result = crp_to_hex(__Result, CRP_SHA256_32BYTES_BLOCKS_COUNT);
+    std::string Result = crp_to_hex(__Result, CRP_SHA256_32BYTES_BLOCKS_COUNT, Delimiter, Format);
 
     crp_free(__Result);
     return Result;
