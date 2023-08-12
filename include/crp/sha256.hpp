@@ -13,8 +13,8 @@
 # include <iostream>
 
 # define CRP_SHA256_LENGTH_BITS 2'048
-# define CRP_SHA256_LENGTH_BYTES 256
-# define CRP_SHA256_LENGTH_PART 32
+# define CRP_SHA256_LENGTH_BYTES 32
+# define CRP_SHA256_LENGTH_PART 1
 # define CRP_SHA256_32BYTES_BLOCKS_COUNT 8
 
 enum class CRP_FORMAT : std::uint8_t {

@@ -2,68 +2,43 @@
 
 # include <crp/sha256.hpp>
 
-[[ nodiscard ]] static inline std::uint32_t ch(const std::uint32_t& x, const std::uint32_t& y, const std::uint32_t& z) noexcept
-{
-    return (x & y) ^ (~x & z);
-}
+# define ch(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
 
-[[ nodiscard ]] static inline std::uint32_t maj(const std::uint32_t& x, const std::uint32_t& y, const std::uint32_t& z) noexcept
-{
-    return (x & y) ^ (x & z) ^ (y & z);
-}
+# define maj(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ (y & (z)))
 
-[[ nodiscard ]] static inline std::uint32_t ROTR(const std::uint32_t& x, const std::uint8_t& r) noexcept
-{
-    return 0x0 | (x >> r) | (x << (8 * (sizeof x) - r));
-}
+// interpreting into ROR
+# define ROTR(x, r) (0x0 | (x >> r) | (x << (8 * sizeof(x) - r)))
 
-[[ nodiscard ]] static inline std::uint32_t S0(const std::uint32_t& x) noexcept
-{
-    return ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22);
-}
+# define S0(x) (ROTR((x), 2) ^ ROTR((x), 13) ^ ROTR((x), 22))
 
-[[ nodiscard ]] static inline std::uint32_t S1(const std::uint32_t& x) noexcept
-{
-    return ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25);
-}
+# define S1(x) (ROTR((x), 6) ^ ROTR((x), 11) ^ ROTR((x), 25))
 
-[[ nodiscard ]] static inline std::uint32_t s0(const std::uint32_t& x) noexcept
-{
-    return ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3);
-}
+# define s0(x) (ROTR((x), 7) ^ ROTR((x), 18) ^ (x >> 3))
 
-[[ nodiscard ]] static inline std::uint32_t s1(const std::uint32_t& x) noexcept
-{
-    return ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10);
-}
+# define s1(x) (ROTR((x), 17) ^ ROTR((x), 19) ^ (x >> 10))
 
-template<typename Type>
-[[ nodiscard ]] std::string to_binary(Type Data) noexcept
-{
-    std::string Result = "";
+constexpr static std::uint32_t Initial[] = {
+    0x6A09E667, 0xBB67AE85,
+    0x3C6EF372, 0xA54FF53A,
+    0x510E527F, 0x9B05688C,
+    0x1F83D9AB, 0x5BE0CD19
+};
 
-    std::uint64_t CurrentBit = 8 * sizeof Data;
-    while(CurrentBit--)
-        Result += ((Data >> CurrentBit) & 1) == 0 ? "0" : "1";
+constexpr static std::uint32_t Constants[] = {
+    0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
+    0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
+    0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
+    0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
+    0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
+    0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
+    0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
+    0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
+};
 
-    return Result;
-}
 
 static void update (std::uint32_t* Result, const std::uint8_t* From) noexcept
 {
-    constexpr static std::uint32_t Constants[] = {
-        0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
-        0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
-        0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
-        0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7, 0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
-        0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13, 0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
-        0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3, 0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
-        0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
-        0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
-    };
-
-    static std::uint32_t Schedule[64];
-    std::memset(Schedule, 0x0, 64);   
+    static std::uint32_t Schedule[64]; 
 
     Schedule[0] = static_cast<std::uint32_t>(From[0]) << 24 | static_cast<std::uint32_t>(From[1]) << 16 | static_cast<std::uint32_t>(From[2]) << 8 | static_cast<std::uint32_t>(From[3]);
     Schedule[1] = static_cast<std::uint32_t>(From[4]) << 24 | static_cast<std::uint32_t>(From[5]) << 16 | static_cast<std::uint32_t>(From[6]) << 8 | static_cast<std::uint32_t>(From[7]);
@@ -81,7 +56,6 @@ static void update (std::uint32_t* Result, const std::uint8_t* From) noexcept
     Schedule[13] = static_cast<std::uint32_t>(From[52]) << 24 | static_cast<std::uint32_t>(From[53]) << 16 | static_cast<std::uint32_t>(From[54]) << 8 | static_cast<std::uint32_t>(From[55]);
     Schedule[14] = static_cast<std::uint32_t>(From[56]) << 24 | static_cast<std::uint32_t>(From[57]) << 16 | static_cast<std::uint32_t>(From[58]) << 8 | static_cast<std::uint32_t>(From[59]);
     Schedule[15] = static_cast<std::uint32_t>(From[60]) << 24 | static_cast<std::uint32_t>(From[61]) << 16 | static_cast<std::uint32_t>(From[62]) << 8 | static_cast<std::uint32_t>(From[63]);
-
     Schedule[16] = s1(Schedule[14]) + Schedule[9] + s0(Schedule[1]) + Schedule[0];
     Schedule[17] = s1(Schedule[15]) + Schedule[10] + s0(Schedule[2]) + Schedule[1];
     Schedule[18] = s1(Schedule[16]) + Schedule[11] + s0(Schedule[3]) + Schedule[2];
@@ -165,23 +139,23 @@ static void update (std::uint32_t* Result, const std::uint8_t* From) noexcept
     Result[7] += h;
 }
 
-[[ nodiscard ]]
-std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
+[[ nodiscard ]] std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
 {
-    constexpr static std::uint32_t Initial[] = {
-        0x6A09E667, 0xBB67AE85,
-        0x3C6EF372, 0xA54FF53A,
-        0x510E527F, 0x9B05688C,
-        0x1F83D9AB, 0x5BE0CD19
-    };
     std::uint64_t Iter = 0x0;
     const std::uint64_t ReservedLength = 64 * ((Length + 8) / 64 + 1);
     
     std::uint32_t* Result = (std::uint32_t*)crp_allocate(32);
-    std::memcpy(Result, Initial, 32);
+    Result[0] = Initial[0];
+    Result[1] = Initial[1];
+    Result[2] = Initial[2];
+    Result[3] = Initial[3];
+    Result[4] = Initial[4];
+    Result[5] = Initial[5];
+    Result[6] = Initial[6];
+    Result[7] = Initial[7];
 
-    std::uint8_t* MessageBlock = (std::uint8_t*)crp_allocate(ReservedLength);
-    std::memset(MessageBlock, 0x0, ReservedLength);
+    std::uint8_t* MessageBlock = (std::uint8_t*)alloca(ReservedLength);
+    std::memset(MessageBlock + Length, 0x0, ReservedLength);
     std::memcpy(MessageBlock, static_cast<const std::uint8_t*>(Data), Length);
     MessageBlock[Length] = (std::uint8_t)0b10000000;
     
@@ -198,7 +172,6 @@ std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
     for(Iter = 0x0; Iter < ReservedLength; Iter += 64)
         update(Result, MessageBlock + Iter);
 
-    crp_free(MessageBlock);
     return Result;
 }
 

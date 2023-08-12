@@ -54,7 +54,7 @@ static void BENCH_CRYPTOPP_RAW_SHA256(benchmark::State& state)
         std::uint8_t* Result = (std::uint8_t*)crp_allocate(256);
         hash.Update((const CryptoPP::byte*)str, Length);
         hash.Final((CryptoPP::byte*)Result);
-        free(Result);
+        crp_free(Result);
     }
 }
 
@@ -66,9 +66,8 @@ static void BENCH_OPENSSL_RAW_SHA256(benchmark::State& state)
     for(auto _ : state)
     {
         std::uint8_t* Result = (std::uint8_t*)crp_allocate(256);
-        unsigned char hash[SHA256_DIGEST_LENGTH];
         SHA256_Update(&sha256, str, Length);
-        SHA256_Final(hash, &sha256);
+        SHA256_Final(Result, &sha256);
         crp_free(Result);
         
     }

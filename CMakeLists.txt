@@ -9,15 +9,15 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
     )
 endif()
 
-option(CRP_HASHES       "Enable hash functions on" ON)
-option(CRP_RANDOM       "Enable random functions on" ON)
-option(CRP_TESTS        "Enable tests on" ON)
-option(CRP_DEBUG        "Enable debug options" ON)
-option(CRP_RELEASE      "Enable max optimizations on" ON)
-option(CRP_WERROR       "Enable warning messages on" ON)
-option(CRP_BENCHMARKS   "Enable benchmarks on" ON)
-option(CRP_USE_MIMALLOC "Use mimalloc on" ON)
-option(CRP_USE_SIMD     "USE SIMD on" OFF)
+option(CRP_HASHES          "Enable hash functions on" ON)
+option(CRP_RANDOM          "Enable random functions on" ON)
+option(CRP_TESTS           "Enable tests on" ON)
+option(CRP_DEBUG           "Enable debug options" ON)
+option(CRP_RELEASE         "Enable max optimizations on" ON)
+option(CRP_WERROR          "Enable warning messages on" ON)
+option(CRP_BENCHMARKS      "Enable benchmarks on" ON)
+option(CRP_USE_MIMALLOC    "Use mimalloc on" ON)
+option(CRP_HASH_USE_SIMD   "USE SIMD on" OFF)
 
 include(FetchContent)
 if(CRP_USE_MIMALLOC)
@@ -93,63 +93,24 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
     add_library(crp::${LIBRARY_NAME} ALIAS ${LIBRARY_NAME})
     set_target_properties(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-    target_include_directories (
-        ${LIBRARY_NAME}
-        PUBLIC
-            ${HEADERS}
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    )
-
-    target_compile_options (
-        ${LIBRARY_NAME}
-        PRIVATE
-            ${PEDANTIC_COMPILE_FLAGS}
-    )
-
-    if(CRP_USE_SIMD)
-        message(WARNING "Now SIMD available only for x86 platforms")
-        target_compile_definitions (
-            ${LIBRARY_NAME}
-            PUBLIC
-                CRP_USE_SIMD
-        )
-    endif()
+    target_include_directories(${LIBRARY_NAME} PUBLIC ${HEADERS} $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+    target_compile_options(${LIBRARY_NAME} PRIVATE ${PEDANTIC_COMPILE_FLAGS})
 
     if(CRP_USE_MIMALLOC)
-        target_link_libraries (
-            ${LIBRARY_NAME}
-            PUBLIC
-                mimalloc
-        )
-        target_compile_definitions (
-            ${LIBRARY_NAME}
-            PUBLIC
-                CRP_USE_MIMALLOC
-        )
+        target_link_libraries(${LIBRARY_NAME} PUBLIC mimalloc)
+        target_compile_definitions(${LIBRARY_NAME} PUBLIC CRP_USE_MIMALLOC)
     endif()
 
     if(CRP_DEBUG)
-        target_compile_options (
-            ${LIBRARY_NAME}
-            PRIVATE
-                -ggdb -g3
-        )
+        target_compile_options(${LIBRARY_NAME} PRIVATE -ggdb -g3)
     endif()
 
     if(CRP_RELEASE)
-        target_compile_options (
-            ${LIBRARY_NAME}
-            PRIVATE
-                -Ofast
-        )
+        target_compile_options(${LIBRARY_NAME} PRIVATE -Ofast)
     endif()
 
     if(CRP_WERROR)
-        target_compile_options (
-            ${LIBRARY_NAME}
-            PRIVATE
-                ${WERROR_FLAG}
-        )
+        target_compile_options(${LIBRARY_NAME} PRIVATE ${WERROR_FLAG})
     endif()
 
     install(TARGETS ${LIBRARY_NAME} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/lib")
