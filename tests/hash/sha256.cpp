@@ -2,7 +2,7 @@
 # include <crp/sha256.hpp>
 
 TEST(SHA256, BLOCKSIZE) {
-    const char* str = "Hello";
+    const char* str = "";
     std::cout << sha256(str, std::strlen(str)) << std::endl;
 }
 

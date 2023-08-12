@@ -157,5 +157,3 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
 endfunction()
 
 GenerateLibrary("hashes" "include/crp" "src/hash")
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE crp::hashes)
