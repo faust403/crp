@@ -28,7 +28,6 @@ FetchContent_Declare(
     GIT_REPOSITORY  https://github.com/weidai11/cryptopp
     GIT_TAG         CRYPTOPP_8_2_0
     CONFIGURE_COMMAND "cmake -S . -B build -DCRYPTOPP_DATA_DIR=\"${${CRYPTOPP}_SOURCE_DIR}/TestData\" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release"
-    BUILD_COMMAND "make -j32"
 )
 
 FetchContent_GetProperties(${CRYPTOPP})

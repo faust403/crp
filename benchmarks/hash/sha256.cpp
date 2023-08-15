@@ -11,7 +11,7 @@
 # include <sstream>
 # include <iomanip>
 
-const char* str = "";
+const char* str = "lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]lkajsgndfldjkngsldfjng;kjndsfpognjfdpjnag;ksdfnj;gjnSD[OAMF[GAOFMB[OIFMD[OGFJNKDS;KFMSNA;KJNLJKNpodfnopsdnjf]]]]";
 const int Length = std::strlen(str);
 
 static void BENCH_CRP_SHA256(benchmark::State& state)
@@ -42,7 +42,9 @@ static void BENCH_CRP_RAW_SHA256(benchmark::State& state)
 {
     for(auto _ : state)
     {
-        crp_free(raw_sha256(str, Length));
+        std::uint32_t* Result = (std::uint32_t*)crp_allocate(CRP_SHA256_LENGTH_BYTES);
+        raw_sha256(str, Length, Result);
+        crp_free(Result);
     }
 }
 
@@ -94,10 +96,10 @@ static void BENCH_OPENSSL_SHA256(benchmark::State& state)
     }
 }
 
-BENCHMARK(BENCH_CRP_SHA256);
-BENCHMARK(BENCH_CRP_RAW_SHA256);
 BENCHMARK(BENCH_CRYPTOPP_SHA256);
 BENCHMARK(BENCH_CRYPTOPP_RAW_SHA256);
 BENCHMARK(BENCH_OPENSSL_SHA256);
 BENCHMARK(BENCH_OPENSSL_RAW_SHA256);
+BENCHMARK(BENCH_CRP_SHA256);
+BENCHMARK(BENCH_CRP_RAW_SHA256);
 BENCHMARK_MAIN();

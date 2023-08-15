@@ -12,7 +12,7 @@ endif()
 option(CRP_HASHES          "Enable hash functions on" ON)
 option(CRP_RANDOM          "Enable random functions on" ON)
 option(CRP_TESTS           "Enable tests on" ON)
-option(CRP_DEBUG           "Enable debug options" ON)
+option(CRP_DEBUG           "Enable debug options" OFF)
 option(CRP_RELEASE         "Enable max optimizations on" ON)
 option(CRP_WERROR          "Enable warning messages on" ON)
 option(CRP_BENCHMARKS      "Enable benchmarks on" ON)
@@ -26,6 +26,7 @@ if(CRP_USE_MIMALLOC)
         GIT_REPOSITORY https://github.com/microsoft/mimalloc.git
         GIT_TAG master
         FIND_PACKAGE_ARGS NAMES mimalloc
+        CONFIGURE_COMMAND "cmake -S . -B build -DCMAKE_BUILD_TYPE=Release"
     )
     FetchContent_GetProperties(mimalloc)
     FetchContent_MakeAvailable(mimalloc)
@@ -118,3 +119,5 @@ function(GenerateLibrary LIBRARY_NAME INCLUDE_PATH SOURCE_PATH)
 endfunction()
 
 GenerateLibrary("hashes" "include/crp" "src/hash")
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE crp::hashes)

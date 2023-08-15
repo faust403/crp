@@ -18,7 +18,7 @@
 # define s1(x) (ROTR((x), 17) ^ ROTR((x), 19) ^ (x >> 10))
 
 # define Round0_15(i) \
-    Schedule[i] = static_cast<std::uint32_t>(From[i]) << 24 | static_cast<std::uint32_t>(From[i + 1]) << 16 | static_cast<std::uint32_t>(From[i + 2]) << 8 | static_cast<std::uint32_t>(From[i + 3]); \
+    Schedule[i] = static_cast<std::uint32_t>(From[i * 4]) << 24 | static_cast<std::uint32_t>(From[i * 4 + 1]) << 16 | static_cast<std::uint32_t>(From[i * 4 + 2]) << 8 | static_cast<std::uint32_t>(From[i * 4 + 3]); \
     tmp1 = h + S1(e) + ch(e, f, g) + Constants[i] + Schedule[i]; \
     tmp2 = S0(a) + maj(a, b, c); \
     h = g; g = f; f = e; \
@@ -34,19 +34,6 @@
     e = d + tmp1; d = c; \
     c = b; b = a; \
     a = tmp1 + tmp2; \
-
-# define Concat4_8_32(target, a, b, c, d) \
-    target = static_cast<decltype(target)>(a) << 24 \
-    | static_cast<decltype(target)>(b) << 16 \
-    | static_cast<decltype(target)>(c) << 8 \
-    | static_cast<decltype(target)>(d); \
-
-constexpr static std::uint32_t Initial[] = {
-    0x6A09E667, 0xBB67AE85,
-    0x3C6EF372, 0xA54FF53A,
-    0x510E527F, 0x9B05688C,
-    0x1F83D9AB, 0x5BE0CD19
-};
 
 constexpr static std::uint32_t Constants[] = {
     0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -114,25 +101,28 @@ static void update(std::uint32_t* Result, const std::uint8_t* From) noexcept
     Result[7] += h;
 }
 
-[[ nodiscard ]]
-std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
+void raw_sha256(const void* Data, std::uint64_t Length, std::uint32_t* Result) noexcept
 {
-    std::uint64_t Iter = 0x0;
     const std::uint64_t ReservedLength = 64 * ((Length + 8) / 64 + 1);
-    
-    std::uint32_t* Result = static_cast<std::uint32_t*>(crp_allocate(32));
-    std::uint8_t* MessageBlock = static_cast<std::uint8_t*>(alloca(ReservedLength));
 
-    Result[0] = Initial[0];
-    Result[1] = Initial[1];
-    Result[2] = Initial[2];
-    Result[3] = Initial[3];
-    Result[4] = Initial[4];
-    Result[5] = Initial[5];
-    Result[6] = Initial[6];
-    Result[7] = Initial[7];
+    const bool isGreaterThan1024 = Length > 1024 ? true : false;
 
-    std::memset(MessageBlock + Length, 0x0, ReservedLength);
+    std::uint8_t* MessageBlock = nullptr;
+    if(isGreaterThan1024) [[ likely ]]
+        MessageBlock = static_cast<std::uint8_t*>(crp_allocate(ReservedLength));
+    else [[ unlikely ]]
+        MessageBlock = static_cast<std::uint8_t*>(alloca(ReservedLength));
+
+    Result[0] = 0x6A09E667;
+    Result[1] = 0xBB67AE85;
+    Result[2] = 0x3C6EF372;
+    Result[3] = 0xA54FF53A;
+    Result[4] = 0x510E527F;
+    Result[5] = 0x9B05688C;
+    Result[6] = 0x1F83D9AB;
+    Result[7] = 0x5BE0CD19;
+
+    std::memset(MessageBlock + Length, 0x0, ReservedLength - Length);
     std::memcpy(MessageBlock, static_cast<const std::uint8_t*>(Data), Length);
     MessageBlock[Length] = (std::uint8_t)0b10000000;
     
@@ -146,10 +136,11 @@ std::uint32_t* raw_sha256(const void* Data, std::uint64_t Length) noexcept
     MessageBlock[ReservedLength - 7] = 255 & (Length >> 48);
     MessageBlock[ReservedLength - 8] = 255 & (Length >> 56);
 
-    for(Iter = 0x0; Iter < ReservedLength; Iter += 64)
+    for(std::uint64_t Iter = 0x0; Iter < ReservedLength; Iter += 64)
         update(Result, MessageBlock + Iter);
 
-    return Result;
+    if(isGreaterThan1024) [[ likely ]]
+        crp_free(MessageBlock);
 }
 
 [[ nodiscard ]]
@@ -204,9 +195,8 @@ std::string crp_to_hex(const std::uint32_t* HexData, std::uint64_t HexLength, co
 [[ nodiscard ]]
 std::string sha256(const void* Data, const std::uint64_t Length, const std::string Delimiter, const CRP_FORMAT Format) noexcept
 {
-    std::uint32_t* __Result = raw_sha256(Data, Length);
-    const std::string Result = crp_to_hex(__Result, CRP_SHA256_32BYTES_BLOCKS_COUNT, Delimiter, Format);
+    std::uint32_t* __Result = (std::uint32_t*)alloca(256);
+    raw_sha256(Data, Length, __Result);
 
-    crp_free(__Result);
-    return Result;
+    return crp_to_hex(__Result, CRP_SHA256_32BYTES_BLOCKS_COUNT, Delimiter, Format);
 }

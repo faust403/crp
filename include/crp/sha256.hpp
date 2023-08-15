@@ -22,5 +22,5 @@ enum class CRP_FORMAT : std::uint8_t {
     lower
 };
 
-std::uint32_t* raw_sha256(const void*, const std::uint64_t) noexcept;
+void raw_sha256(const void*, const std::uint64_t, std::uint32_t*) noexcept;
 std::string sha256(const void*, const std::uint64_t, const std::string = "", const CRP_FORMAT = CRP_FORMAT::lower) noexcept;
